@@ -4,17 +4,19 @@ const fetch = require('node-fetch');
 const {
   SLACK_BOT_TOKEN,
   SLACK_SIGNING_SECRET,
+  SLACK_APP_TOKEN,
   YDC_API_KEY,
-  PORT = 3001,
 } = process.env;
 
-for (const [key, val] of Object.entries({ SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET, YDC_API_KEY })) {
+for (const [key, val] of Object.entries({ SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET, SLACK_APP_TOKEN, YDC_API_KEY })) {
   if (!val) { console.error(`ERROR: ${key} is required`); process.exit(1); }
 }
 
 const app = new App({
   token: SLACK_BOT_TOKEN,
   signingSecret: SLACK_SIGNING_SECRET,
+  socketMode: true,
+  appToken: SLACK_APP_TOKEN,
 });
 
 // ── You.com Search ────────────────────────────────────────────────────────────
@@ -189,6 +191,6 @@ app.command('/youbrief', async ({ command, ack, respond }) => {
 // ── Start ─────────────────────────────────────────────────────────────────────
 
 (async () => {
-  await app.start(PORT);
-  console.log(`You.com Slack bot running on port ${PORT}`);
+  await app.start();
+  console.log('You.com Slack bot connected via Socket Mode');
 })();

@@ -1,0 +1,28 @@
+display_information:
+  name: YouBot
+  description: Search the web and get topic briefings powered by You.com
+  background_color: "#0C0C12"
+
+features:
+  bot_user:
+    display_name: YouBot
+    always_online: true
+  slash_commands:
+    - command: /yousearch
+      description: Search the web via You.com
+      usage_hint: "[query]"
+      should_escape: false
+    - command: /youbrief
+      description: 3-bullet briefing on any topic
+      usage_hint: "[topic]"
+      should_escape: false
+
+oauth_config:
+  scopes:
+    bot:
+      - commands
+      - chat:write
+
+settings:
+  socket_mode_enabled: true
+  token_rotation_enabled: false

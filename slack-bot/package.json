@@ -7,7 +7,7 @@
     "dev": "node --watch bot.js"
   },
   "dependencies": {
-    "@slack/bolt": "^3.19.0",
+    "@slack/bolt": "^3.22.0",
     "node-fetch": "^2.7.0"
   }
 }
