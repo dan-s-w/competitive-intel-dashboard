@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Competitive Intel Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0C0C12;
+      color: #E2E4F0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding: 32px 24px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 36px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    h1 span { color: #5368EE; }
+
+    .form-section {
+      background: #13131F;
+      border: 1px solid #1E1E30;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    .form-section h2 {
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6B6E8A;
+      margin-bottom: 16px;
+    }
+
+    .inputs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      background: #0C0C12;
+      border: 1px solid #1E1E30;
+      border-radius: 8px;
+      color: #E2E4F0;
+      font-size: 0.9rem;
+      padding: 10px 14px;
+      width: 100%;
+      transition: border-color 0.15s;
+      outline: none;
+    }
+
+    input[type="text"]:focus { border-color: #5368EE; }
+    input[type="text"]::placeholder { color: #3A3D56; }
+
+    .actions { display: flex; gap: 12px; align-items: center; }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 10px 20px;
+      transition: opacity 0.15s, background 0.15s;
+    }
+
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-primary {
+      background: #5368EE;
+      color: #fff;
+    }
+    .btn-primary:hover:not(:disabled) { background: #6779f5; }
+
+    .btn-secondary {
+      background: #1E1E30;
+      color: #9DA0BC;
+    }
+    .btn-secondary:hover:not(:disabled) { background: #252538; }
+
+    .status-text {
+      font-size: 0.8rem;
+      color: #6B6E8A;
+    }
+
+    #results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .col-card {
+      background: #13131F;
+      border: 1px solid #1E1E30;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .col-card.error { border-color: #4A1C2A; }
+    .col-card.loading { opacity: 0.6; }
+
+    .col-header {
+      background: #0F0F1A;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1E1E30;
+    }
+
+    .col-header .company-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #E2E4F0;
+    }
+
+    .col-header .timestamp {
+      font-size: 0.7rem;
+      color: #6B6E8A;
+    }
+
+    .cache-badge {
+      font-size: 0.65rem;
+      background: #1A2040;
+      color: #5368EE;
+      border-radius: 4px;
+      padding: 2px 6px;
+      margin-left: 8px;
+    }
+
+    .col-body { padding: 14px 18px; display: flex; flex-direction: column; gap: 16px; }
+
+    .result-item { display: flex; flex-direction: column; gap: 4px; }
+
+    .result-item + .result-item {
+      padding-top: 16px;
+      border-top: 1px solid #1A1A28;
+    }
+
+    .result-title {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #C8CBE8;
+      text-decoration: none;
+      line-height: 1.4;
+    }
+    .result-title:hover { color: #5368EE; }
+
+    .result-snippet {
+      font-size: 0.8rem;
+      color: #6B6E8A;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .result-source {
+      font-size: 0.7rem;
+      color: #3A3D56;
+      margin-top: 2px;
+    }
+
+    .error-body {
+      padding: 18px;
+      color: #C0526A;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .error-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+    .no-results { padding: 18px; color: #6B6E8A; font-size: 0.85rem; }
+
+    .skeleton {
+      background: linear-gradient(90deg, #1A1A28 25%, #212135 50%, #1A1A28 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 4px;
+      height: 12px;
+      margin-bottom: 8px;
+    }
+    .skeleton.tall { height: 16px; }
+    .skeleton.short { width: 60%; }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Competitive <span>Intel</span></h1>
+  <button class="btn-secondary" id="refreshBtn" disabled>Refresh All</button>
+</header>
+
+<div class="form-section">
+  <h2>Competitors</h2>
+  <div class="inputs-grid" id="inputsGrid"></div>
+  <div class="actions">
+    <button class="btn-primary" id="searchBtn">Search</button>
+    <span class="status-text" id="statusText"></span>
+  </div>
+</div>
+
+<div id="results-grid"></div>
+
+<script>
+  const NUM_INPUTS = 5;
+  const inputsGrid = document.getElementById('inputsGrid');
+  const resultsGrid = document.getElementById('results-grid');
+  const searchBtn = document.getElementById('searchBtn');
+  const refreshBtn = document.getElementById('refreshBtn');
+  const statusText = document.getElementById('statusText');
+
+  // Build inputs
+  for (let i = 0; i < NUM_INPUTS; i++) {
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.placeholder = `Competitor ${i + 1}`;
+    inp.dataset.index = i;
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+    inputsGrid.appendChild(inp);
+  }
+
+  function getCompetitors() {
+    return [...inputsGrid.querySelectorAll('input')]
+      .map(i => i.value.trim())
+      .filter(Boolean);
+  }
+
+  function formatTime(ts) {
+    return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function renderSkeleton(name) {
+    const card = document.createElement('div');
+    card.className = 'col-card loading';
+    card.innerHTML = `
+      <div class="col-header">
+        <span class="company-name">${escHtml(name)}</span>
+        <span class="timestamp">Fetching…</span>
+      </div>
+      <div class="col-body">
+        ${[1,2,3].map(() => `
+          <div class="result-item">
+            <div class="skeleton tall"></div>
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+            <div class="skeleton short"></div>
+          </div>`).join('')}
+      </div>`;
+    return card;
+  }
+
+  function renderCard(data) {
+    const card = document.createElement('div');
+    card.className = 'col-card';
+
+    if (data.status === 'error') {
+      card.classList.add('error');
+      card.innerHTML = `
+        <div class="col-header">
+          <span class="company-name">${escHtml(data.competitor)}</span>
+          <span class="timestamp">Failed</span>
+        </div>
+        <div class="error-body">
+          <span class="error-icon">⚠</span>
+          <span>${escHtml(data.error)}</span>
+        </div>`;
+      return card;
+    }
+
+    const resultsHtml = data.hits.length === 0
+      ? `<div class="no-results">No results found.</div>`
+      : data.hits.map(h => `
+          <div class="result-item">
+            <a class="result-title" href="${escHtml(h.url)}" target="_blank" rel="noopener">
+              ${escHtml(h.title)}
+            </a>
+            ${h.snippet ? `<p class="result-snippet">${escHtml(h.snippet)}</p>` : ''}
+            ${h.source ? `<span class="result-source">${escHtml(h.source)}</span>` : ''}
+          </div>`).join('');
+
+    card.innerHTML = `
+      <div class="col-header">
+        <span class="company-name">
+          ${escHtml(data.competitor)}
+          ${data.fromCache ? '<span class="cache-badge">cached</span>' : ''}
+        </span>
+        <span class="timestamp">${formatTime(data.timestamp)}</span>
+      </div>
+      <div class="col-body">${resultsHtml}</div>`;
+    return card;
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  async function doSearch(clearCache = false) {
+    const competitors = getCompetitors();
+    if (competitors.length === 0) {
+      statusText.textContent = 'Enter at least one competitor name.';
+      return;
+    }
+
+    searchBtn.disabled = true;
+    refreshBtn.disabled = true;
+    statusText.textContent = 'Searching…';
+
+    if (clearCache) {
+      await fetch('/api/refresh', { method: 'POST' }).catch(() => {});
+    }
+
+    // Render skeletons immediately
+    resultsGrid.innerHTML = '';
+    const skeletons = competitors.map(name => {
+      const el = renderSkeleton(name);
+      resultsGrid.appendChild(el);
+      return el;
+    });
+
+    try {
+      const res = await fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ competitors })
+      });
+      const data = await res.json();
+
+      // Replace skeletons with real cards
+      data.forEach((item, i) => {
+        const card = renderCard(item);
+        resultsGrid.replaceChild(card, skeletons[i]);
+      });
+
+      const cached = data.filter(d => d.fromCache).length;
+      statusText.textContent = cached
+        ? `Done — ${cached} of ${data.length} from cache`
+        : `Done — ${data.length} results fetched`;
+    } catch (err) {
+      statusText.textContent = 'Request failed: ' + err.message;
+      skeletons.forEach(s => s.remove());
+    }
+
+    searchBtn.disabled = false;
+    refreshBtn.disabled = competitors.length === 0;
+  }
+
+  searchBtn.addEventListener('click', () => doSearch(false));
+  refreshBtn.addEventListener('click', () => doSearch(true));
+</script>
+</body>
+</html>
